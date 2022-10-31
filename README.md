@@ -1,3 +1,5 @@
+![build](https://github.com/taobrienlbl/simple_dynamical_models/actions/workflows/test-simplemodels.yml/badge.svg)
+
 
 # Simple dynamical models
 This code contains a set of dynamical models suitable for teaching.  The intent is for these to have a low set of requirements such that they can be run in Google CoLab or other environments with little-or-no installation required.
