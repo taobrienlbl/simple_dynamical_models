@@ -1,4 +1,4 @@
-![build](https://github.com/taobrienlbl/simple_dynamical_models/actions/workflows/test-simplemodels.yml/badge.svg)
+![testing](https://github.com/taobrienlbl/simple_dynamical_models/actions/workflows/test-simplemodels.yml/badge.svg)
 
 
 # Simple dynamical models

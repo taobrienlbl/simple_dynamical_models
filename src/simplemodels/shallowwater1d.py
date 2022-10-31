@@ -9,6 +9,48 @@ r = (slice(1,-1,None), slice(2, None, None))
 d = (slice(None, -2, None), slice(1, -1, None))
 u = (slice(2, None, None), slice(1, -1, None))
 
+def zero_neumann_boundary(array, axis = -1):
+    """ Implements a boundary condition for no derivative in the given quantity. """
+
+    ndims = len(array.shape)
+    slice_accessor_lhs = ndims*[slice(None,None,None)]
+    slice_accessor_rhs = ndims*[slice(None,None,None)]
+
+   # extend the boundaries on the low-index side
+    slice_accessor_lhs[axis] = 0
+    slice_accessor_rhs[axis] = 1
+    array[tuple(slice_accessor_lhs)] = array[tuple(slice_accessor_rhs)]
+
+    # extend the boundaries on the high-index side
+    slice_accessor_lhs[axis] = -1 
+    slice_accessor_rhs[axis] = -2
+    array[tuple(slice_accessor_lhs)] = array[tuple(slice_accessor_rhs)]
+
+
+def zero_dirichlet_boundary(array, axis = -1):
+    """ Implements a boundary condition that sets the boundary to 0. 
+        
+        input:
+        ------
+
+            array : the input array
+
+            axis : the axis along which to apply the boundary condition
+    """
+
+    ndims = len(array.shape)
+    slice_accessor_lhs = ndims*[slice(None,None,None)]
+    slice_accessor_lhs[axis] = 0
+    slice_accessor_rhs = ndims*[slice(None,None,None)]
+    slice_accessor_rhs[axis] = -1
+
+    # set the boundary values
+    array[tuple(slice_accessor_lhs)] = 0
+    array[tuple(slice_accessor_rhs)] = 0
+
+    return
+
+
 def periodic_boundary(array, axis = -1):
     """ Implements a periodic boundary condition via ghost cells for the specified dimension """
     ndims = len(array.shape)
@@ -155,8 +197,40 @@ class SW1DSolver:
         # set the boundary condition callback function
         if x_is_periodic:
             self.x_boundary_function = lambda x: periodic_boundary(x, axis = -1)
+        else:
+            def fixed_x_boundary(state):
+                """ Sets h and u to 0 at the x-boundary, and no-slip in v"""
+                zero_neumann_boundary(
+                    state[self.state_indices['h']],
+                    axis = -1
+                    )
+                zero_neumann_boundary(
+                    state[self.state_indices['u']],
+                    axis = -1
+                    )
+                zero_neumann_boundary(
+                    state[self.state_indices['v']],
+                    axis = -1)
+            self.x_boundary_function = fixed_x_boundary
+
         if y_is_periodic:
             self.y_boundary_function = lambda x: periodic_boundary(x, axis = -2)
+        else:
+            def fixed_y_boundary(state):
+                """ Sets h and v to 0 at the y-boundary, and no-slip in u"""
+                zero_neumann_boundary(
+                    state[self.state_indices['h']],
+                    axis = -2
+                    )
+                zero_neumann_boundary(
+                    state[self.state_indices['v']],
+                    axis = -2
+                    )
+                zero_neumann_boundary(
+                    state[self.state_indices['u']],
+                    axis = -2)
+            self.y_boundary_function = fixed_y_boundary
+
             
         if advection_testing:
             # set the RHS for the u and v quantities such that they aren't updated

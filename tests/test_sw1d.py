@@ -203,3 +203,45 @@ def test_meridional_geostrophic_jet():
 
     # expected result: no change
     assert np.all(np.isclose(test7._state_[:,1:-1,1:-1],state0))
+
+def test_zonal_geostrophic_jet_fixed_y_boundary():
+    """ Test 8: symmetric, geostrophically-balanced zonal jets with fixed boundary condition """
+    # set the initial condition to be a bell
+    nx = ny = 101
+    dx = dy = 50e3
+    s_b = 5 
+    a_b = 10
+    h0 = 5e3 # m
+    u0 = 30 # m/s
+    cx = (nx-1)/2
+    cy = (ny-1)/2
+    x = np.arange(nx)
+    y = np.arange(ny)
+    x, y = np.meshgrid(x,y)
+    eta_b = 0 # m
+    f = 1e-5 # 1/s
+    g = 9.806 # m/s/s
+
+    # make a zonal jet
+    state0 = np.zeros([3,ny,nx])
+    state0[0,...] = \
+        u0 * np.exp(-(y - (cy + cy/2))**2/(2*s_b**2)) \
+        - u0 * np.exp(-(y - (cy - cy/2))**2/(2*s_b**2))
+
+    # calculate the geostrophically-balanced height field
+    state0[2,...] = h0
+    for i in range(-1,ny-2):
+        state0[2,i+2,:] = state0[2,i,:] - (2*dy*f/g)*state0[0,i+1,:]
+    for j in range(-1,nx-2):
+        state0[2,:,j+2] = state0[2,:,j] + (2*dx*f/g)*state0[1,:,j+1]
+
+    test8 = SW1DSolver(
+        nx = nx, ny = ny, dx = dx, dy = dy,
+        f = f, eta_b = eta_b, g = g,
+        advection_testing=False, state0 = state0,
+        y_is_periodic=False, x_is_periodic=True)
+
+    test8.step_forward(ndays = 1*test8.dt/86400, state0 = state0)
+
+    # expected result: no change
+    assert np.all(np.isclose(test8._state_[:,1:-1,1:-1],state0))
