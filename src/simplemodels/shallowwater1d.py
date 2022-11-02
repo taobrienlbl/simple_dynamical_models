@@ -199,7 +199,7 @@ class SW1DSolver:
             self.x_boundary_function = lambda x: periodic_boundary(x, axis = -1)
         else:
             def fixed_x_boundary(state):
-                """ Sets h and u to 0 at the x-boundary, and no-slip in v"""
+                """ Sets boundaries to have zero derivatives."""
                 zero_neumann_boundary(
                     state[self.state_indices['h']],
                     axis = -1
@@ -217,7 +217,7 @@ class SW1DSolver:
             self.y_boundary_function = lambda x: periodic_boundary(x, axis = -2)
         else:
             def fixed_y_boundary(state):
-                """ Sets h and v to 0 at the y-boundary, and no-slip in u"""
+                """ Sets boundaries to have zero derivatives. """
                 zero_neumann_boundary(
                     state[self.state_indices['h']],
                     axis = -2
