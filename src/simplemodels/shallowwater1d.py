@@ -181,7 +181,7 @@ class SW1DSolver:
             
             if not self.advection_testing:
                 # set the CFL velocity based on the average fluid depth
-                h_avg = np.mean(state0[self.state_indices['h'],:,:])
+                h_avg = np.mean(state0[self.state_indices['h'],1:-1,1:-1])
                 # calculate the phase speed of typical gravity waves in this fluid
                 self.c_cfl = np.sqrt(np.abs(self.g * h_avg))
             
@@ -373,6 +373,8 @@ class SW1DSolver:
         out_ds['U'].attrs['units'] = "m/s"
         out_ds['V'].attrs['long_name'] = "Meridional wind"
         out_ds['V'].attrs['units'] = "m/s"
+        out_ds['H'].attrs['long_name'] = "Height"
+        out_ds['H'].attrs['units'] = "m"
         
         return out_ds
         
